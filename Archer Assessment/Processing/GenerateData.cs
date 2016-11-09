@@ -1,32 +1,38 @@
 ﻿using Archer_Assessment.EntityModels;
-using Archer_Assessment.Helpers;
+using Archer_Assessment.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Archer_Assessment.Processing
 {
     public class GenerateData
     {
-        public GenerateData()
-        {
+        private static readonly Random _random = new Random();
 
-        }
-
-        public static void GenerateCSVData(Client client)
+        public static List<ClientData> GenerateRandomData(Client client)
         {
             var clientData = new List<ClientData>();
 
-            for (int i = 0; i <= 100; i++)
+            for (int i = 0; i < 100; i++)
             {
-                clientData.Add(new ClientData { ClientId = client.ClientId, Name = RandomNameGenerator.NameGenerator.Generate(RandomNameGenerator.Gender.Male), CellNumber = "", Email = "" });
+                var name = RandomNameGenerator.NameGenerator.Generate(RandomNameGenerator.Gender.Male);
+                clientData.Add(new ClientData { ClientId = client.ClientId, Name = name, CellNumber = GeneratePhoneNumber(), Email = $"{name.ToLower().Replace(" ", "")}@{Enum.GetName(typeof(EmailProviders), _random.Next(4)).ToLower()}.com" });
             }
 
-            var profile = client.MappingProfile;
+            return clientData;
+        }
 
-            CSVHelper.OutputCSVData(clientData, profile);
+        private static string GeneratePhoneNumber()
+        {
+            string number = "0";
+
+            for (int i = 0; i <= 10; i++)
+            {
+                number += _random.Next(9).ToString();
+            }
+            return number;
         }
     }
+
+
 }

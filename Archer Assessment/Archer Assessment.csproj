@@ -66,6 +66,7 @@
     <Compile Include="EntityModels\ClientData.cs" />
     <Compile Include="EntityModels\MappingProfile.cs" />
     <Compile Include="EntityModels\AssessmentContext.cs" />
+    <Compile Include="Enums\EmailProviders.cs" />
     <Compile Include="Enums\FileFormat.cs" />
     <Compile Include="Helpers\CSVHelper.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
@@ -84,18 +85,15 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="MockData\Client1.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="MockData\Client2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201611081828458_Initial.resx">
       <DependentUpon>201611081828458_Initial.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MockData\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

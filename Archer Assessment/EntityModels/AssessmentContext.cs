@@ -15,14 +15,15 @@ namespace Archer_Assessment.EntityModels
         public AssessmentContext()
             : base("name=AssessmentContext")
         {
+            Configuration.LazyLoadingEnabled = true;
         }
 
         // Add a DbSet for each entity type that you want to include in your model. For more information 
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
 
-        public DbSet<Client> Clients { get; set; }
-        public DbSet<ClientData> Data { get; set; }
-        public DbSet<MappingProfile> MappingsProfiles { get; set; }
-        public DbSet<Mapping> Mappings { get; set; }
+        public virtual DbSet<Client> Clients { get; set; }
+        public virtual DbSet<ClientData> Data { get; set; }
+        public virtual DbSet<MappingProfile> MappingsProfiles { get; set; }
+        public virtual DbSet<Mapping> Mappings { get; set; }
     }
 }

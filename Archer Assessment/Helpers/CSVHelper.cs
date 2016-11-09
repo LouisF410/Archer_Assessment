@@ -1,4 +1,5 @@
-﻿using Archer_Assessment.EntityModels;
+﻿using System.Collections.Generic;
+using Archer_Assessment.EntityModels;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -10,34 +11,44 @@ namespace Archer_Assessment.Helpers
 {
     public class CSVHelper
     {
-        public static DataTable ExtractCSVData(string filePath)
+        public static List<Dictionary<string, string>> ExtractCsvData(string filePath, char seperator)
         {
-            DataTable dt = new DataTable();
+            var result = new List<Dictionary<string, string>>();
 
             using (var file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                StreamReader sr = new StreamReader(file);
+                var sr = new StreamReader(file);
+                var properties = sr.ReadLine().Split(seperator);
 
-                var headers = sr.ReadLine();
-                dt.Columns.AddRange(headers.Split(',').Select(c => new DataColumn { ColumnName = c }).ToArray());
 
                 while (!sr.EndOfStream)
                 {
-                    DataRow dr = dt.NewRow();
-                    dr.ItemArray = sr.ReadLine().Split(',');
-                    dt.Rows.Add(dr);
+                    var a = new Dictionary<string, string>();
+                    var items = sr.ReadLine().Split(seperator);
+                    for (var i = 0; i < properties.Length; i++)
+                    {
+                        a.Add(properties[i], items[i]);
+                    }
+
+                    result.Add(a);
                 }
             }
-            return dt;
+
+            return result;
         }
 
-        public static void OutputCSVData(dynamic data, MappingProfile profile)
+        public static void OutputCsvData(string filePath, string data)
         {
-            StringBuilder sb = new StringBuilder();
+            if (File.Exists(filePath)) File.Delete(filePath);
 
-            foreach (var item in data)
+            using (var file = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
             {
+                var sw = new StreamWriter(file);
 
+                sw.Write(data);
+
+                sw.Flush();
+                file.Close();
             }
         }   
     }
