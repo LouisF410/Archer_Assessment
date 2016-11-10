@@ -7,8 +7,16 @@ using Newtonsoft.Json.Bson;
 
 namespace Archer_Assessment.Helpers
 {
-    public class JSONHelper
+    /// <summary>
+    /// Handles JSON file tasks.
+    /// </summary>
+    public class JsonHelper
     {
+        /// <summary>
+        /// Extracts data from JSON File.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public static List<Dictionary<string, string>> ExtractJsonData(string filePath)
         {
             using (var file = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -19,6 +27,12 @@ namespace Archer_Assessment.Helpers
             }
         }
 
+
+        /// <summary>
+        /// Push data to JSON file.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="data"></param>
         public static void OutputJsonFile(string filePath, List<Dictionary<string, string>> data)
         {
             if (File.Exists(filePath)) File.Delete(filePath);

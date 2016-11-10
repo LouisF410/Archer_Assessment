@@ -3,105 +3,95 @@ using Archer_Assessment.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Archer_Assessment.Processing
 {
+    /// <summary>
+    /// Handles the processing of data
+    /// </summary>
     public class ProcessData
     {
-        private readonly string filePath = $@"{Environment.CurrentDirectory}\MockData\";
-        private readonly AssessmentContext db;
+        private readonly string _filePath = $@"{Environment.CurrentDirectory}\MockData\";
+        private const string _pattern = @"^(\d{10})$";
 
         public ProcessData()
         {
-            db = new AssessmentContext();
+            if (!System.IO.Directory.Exists(_filePath)) System.IO.Directory.CreateDirectory(_filePath);
         }
 
         public void Start()
         {
-            var clients = db.Clients.Select(x => x);
-
-            foreach (var client in clients)
+            using (var db = new AssessmentContext())
             {
-                var clientData = GenerateData.GenerateRandomData(client);
+                var clients = db.Clients.Select(x => x);
 
-                if (client.MappingProfile.Format == FileFormat.Csv.ToString())
+                //Generate Data and push to files
+                foreach (var client in clients)
                 {
-                    CSVHelper.OutputCsvData($"{filePath}{client.ClientName}.{client.MappingProfile.Format}", GenerateCSVFileData(client, clientData));
+                    var clientData = GenerateData.GenerateRandomData(client);
+
+                    if (client.MappingProfile.Format == FileFormat.Csv.ToString())
+                    {
+                        CsvHelper.OutputCsvData($"{_filePath}{client.ClientName}.{client.MappingProfile.Format}",
+                            GenerateData.GenerateCSVFileData(client, clientData));
+                    }
+                    else if (client.MappingProfile.Format == FileFormat.Json.ToString())
+                    {
+                        JsonHelper.OutputJsonFile($"{_filePath}{client.ClientName}.{client.MappingProfile.Format}",
+                            GenerateData.GenerateJsonFileData(client, clientData));
+                    }
                 }
-                else if (client.MappingProfile.Format == FileFormat.Json.ToString())
+
+
+                //Read Files and push to database
+                foreach (var client in clients)
                 {
-                    JSONHelper.OutputJsonFile($"{filePath}{client.ClientName}.{client.MappingProfile.Format}", GenerateJsonFileData(client, clientData));
+                    var data = new List<Dictionary<string, string>>();
+
+                    if (client.MappingProfile.Format == FileFormat.Csv.ToString())
+                    {
+                        data = CsvHelper.ExtractCsvData($"{_filePath}{client.FileName}.{client.MappingProfile.Format}",
+                            client.MappingProfile.Seperator.ToCharArray()[0]);
+                    }
+                    else if (client.MappingProfile.Format == FileFormat.Json.ToString())
+                    {
+                        data = JsonHelper.ExtractJsonData($"{_filePath}{client.FileName}.{client.MappingProfile.Format}");
+                    }
+
+                    SaveToDatabase(data, client);
                 }
             }
-
-            foreach (var client in clients)
-            {
-                var data = new List<Dictionary<string, string>>();
-
-                if (client.MappingProfile.Format == FileFormat.Csv.ToString())
-                {
-                    data = CSVHelper.ExtractCsvData($"{filePath}{client.FileName}.{client.MappingProfile.Format}",
-                        client.MappingProfile.Seperator.ToCharArray()[0]);
-                }
-                else if (client.MappingProfile.Format == FileFormat.Json.ToString())
-                {
-                    data = JSONHelper.ExtractJsonData($"{filePath}{client.MappingProfile.Format}");     
-                }
-
-                SaveToDatabase(data, client);
-            }
-
         }
 
-        private string GenerateCSVFileData<T>(Client client, List<T> clientData)
-        {
-            var sb = new StringBuilder();
-            var mappings = client.MappingProfile.Mappings;
-            var properties = typeof(T).GetProperties();
-
-            sb.AppendLine(string.Join(",", mappings.Select(map => map.SourceField)));
-
-            foreach (var data in clientData)
-            {
-                sb.AppendLine(string.Join(",",
-                    mappings.Select(x => properties.First((prop => prop.Name == x.DatabaseField)).GetValue(data))));
-            }
-
-            return sb.ToString();
-        }
-
-        private List<Dictionary<string,string>> GenerateJsonFileData<T>(Client client, List<T> clientData)
-        {
-            var mappings = client.MappingProfile.Mappings;
-            var properties = typeof(T).GetProperties();
-
-            return clientData.Select(data => mappings.ToDictionary(map => map.SourceField, map => properties.First(prop => prop.Name == map.DatabaseField).GetValue(data).ToString())).ToList();
-        }
-
+        /// <summary>
+        /// Save Data to Database
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="client"></param>
         private void SaveToDatabase(List<Dictionary<string, string>> data, Client client)
         {
-            var mappings = client.MappingProfile.Mappings;
-
-            var properties = typeof(ClientData).GetProperties();
-
-            foreach (var d in data.ToList())
+            using (var db = new AssessmentContext())
             {
-                var cd = db.Data.Create();
+                var mappings = client.MappingProfile.Mappings;
+                var properties = typeof(ClientData).GetProperties();
 
-                cd.ClientId = client.ClientId;
-
-                //var cd = new ClientData {ClientId = client.ClientId};
-
-                foreach (var map in mappings)
+                foreach (var d in data.ToList())
                 {
-                    var prop = properties.First(x => x.Name == map.DatabaseField);
-                    prop.SetValue(cd, d[map.SourceField]);
+                    var cd = new ClientData {ClientId = client.ClientId};
+
+                    foreach (var map in mappings)
+                    {
+                        var prop = properties.First(x => x.Name == map.DatabaseField);
+                        prop.SetValue(cd, d[map.SourceField]);
+                    }
+
+                    cd.Result = $"[IsValid]={Regex.IsMatch(cd.CellNumber, _pattern)}";
+                    db.Data.Add(cd);
                 }
-                db.Data.Add(cd);
+
                 db.SaveChanges();
             }
-            
         }
     }
 }

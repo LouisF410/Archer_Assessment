@@ -6,6 +6,7 @@ namespace Archer_Assessment.EntityModels
     public class Mapping
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int MappingId { get; set; }  
         public string SourceField { get; set; }
         public string DatabaseField { get; set; }

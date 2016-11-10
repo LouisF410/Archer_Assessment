@@ -71,10 +71,6 @@
     <Compile Include="Helpers\CSVHelper.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
     <Compile Include="EntityModels\Mapping.cs" />
-    <Compile Include="Migrations\201611081828458_Initial.cs" />
-    <Compile Include="Migrations\201611081828458_Initial.Designer.cs">
-      <DependentUpon>201611081828458_Initial.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Processing\GenerateData.cs" />
     <Compile Include="Processing\ProcessData.cs" />
@@ -87,14 +83,7 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201611081828458_Initial.resx">
-      <DependentUpon>201611081828458_Initial.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MockData\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

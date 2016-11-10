@@ -9,8 +9,18 @@ using System.Threading.Tasks;
 
 namespace Archer_Assessment.Helpers
 {
-    public class CSVHelper
+    /// <summary>
+    /// Handles CSV file tasks
+    /// </summary>
+    public class CsvHelper
     {
+
+        /// <summary>
+        /// Extracts data from CSV files.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="seperator"></param>
+        /// <returns></returns>
         public static List<Dictionary<string, string>> ExtractCsvData(string filePath, char seperator)
         {
             var result = new List<Dictionary<string, string>>();
@@ -19,7 +29,6 @@ namespace Archer_Assessment.Helpers
             {
                 var sr = new StreamReader(file);
                 var properties = sr.ReadLine().Split(seperator);
-
 
                 while (!sr.EndOfStream)
                 {
@@ -33,10 +42,14 @@ namespace Archer_Assessment.Helpers
                     result.Add(a);
                 }
             }
-
             return result;
         }
 
+        /// <summary>
+        /// Push data to CSV file.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="data"></param>
         public static void OutputCsvData(string filePath, string data)
         {
             if (File.Exists(filePath)) File.Delete(filePath);
